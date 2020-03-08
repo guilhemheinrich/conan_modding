@@ -2,7 +2,6 @@ import * as path from 'path'
 import * as fs from 'fs-extra'
 import commander from 'commander'
 
-import itemTable from './ItemTable_original.json'
 
 import { Item, ItemSelector } from './src/struct/Item'
 // import filterItem from './src/selectOnItemTable'
@@ -10,56 +9,8 @@ import writeCSV from './src/writeCSV'
 import human_weapons from './src/rework/human_weapons'
 import human_bow from './src/rework/human_bowAndAmmunitions'
 
-let itemDict: { [reference: string]: Item } = {};
-(<Item[]>itemTable).forEach((item: Item) => {
-    itemDict[item.RowName] = item
-})
-const HumanArmorSelector: ItemSelector = {
-    "GUICategory": "Armor",
-    "ItemClass": ["/Game/Items/BPGameItemArmor.BPGameItemArmor_C", "/Game/Items/Sandstorm/BP_SandstormBreather.BP_SandstormBreather_C"],
-    "DamageHealthLight_OnHit": (damage: number) => {
-        return damage === 0
-    }
-}
 
-const HumanWeaponSelector_noBow: ItemSelector = {
-    "GUICategory": "Weapon",
-    "WeaponType" : (weapon_type) => weapon_type !== "Bow",
-    "DamageHealthLight_OnHit": (damage: number) => {
-        return damage > 10
-    },
-    "WeaponArcheType": (weapon_archetype) => weapon_archetype !== "Ammunition",
-    "HarvestDamage": (damage: number) => {
-        return damage === 0
-    },
-    "Icon":
-        (icon: string) => {
-            return icon !== "/Game/UI/Textures/Icons/icon_weapon_animal_DEV.icon_weapon_animal_DEV" && !(/icon_legendary/.test(icon))
-        },
-}
 
-const HumanWeaponSelector_BowAndAmmo: ItemSelector = {
-    "GUICategory": "Weapon",
-    "WeaponType" : (weapon_type) => weapon_type !== "Bow",
-    "DamageHealthLight_OnHit": (damage: number) => {
-        return damage > 10
-    },
-    "WeaponArcheType": (weapon_archetype) => weapon_archetype !== "Ammunition",
-    "HarvestDamage": (damage: number) => {
-        return damage === 0
-    },
-    "Icon":
-        (icon: string) => {
-            return icon !== "/Game/UI/Textures/Icons/icon_weapon_animal_DEV.icon_weapon_animal_DEV" && !(/icon_legendary/.test(icon))
-        },
-}
-
-const MonsterWeaponSelector: ItemSelector = {
-    "GUICategory": "Armor",
-    "DamageHealthLight_OnHit": (damage: number) => {
-        return damage > 0
-    }
-}
 
 const csv_options = {
     fieldSeparator: ';',
@@ -73,12 +24,40 @@ const csv_options = {
     // headers: ['Column 1', 'Column 2', etc...] <-- Won't work with useKeysAsHeaders present!
 };
 
+// import itemTable from './ItemTable_original.json'
+
+// let itemDict: { [reference: string]: Item } = {};
+// (<Item[]>itemTable).forEach((item: Item) => {
+//     itemDict[item.RowName] = item
+// })
 // let reworked_weapons = human_weapons((<Item[]>itemTable), itemDict)
 // writeCSV(reworked_weapons, ['./ItemSubTable/reworked_melee_human_weapon.csv'], csv_options)
 
-let reworked_bows = human_bow((<Item[]>itemTable), itemDict)
-writeCSV(reworked_bows, ['./ItemSubTable/reworked_bow_human_weapon.csv'], csv_options)
+// let reworked_bows = human_bow((<Item[]>itemTable), itemDict)
+// writeCSV(reworked_bows, ['./ItemSubTable/reworked_bow_human_weapon.csv'], csv_options)
 
+import monsterTable from './MonsterStatTable_original.json'
+import hp_curve from './src/rework/monster_hp_curve'
+const capAndFactor = [
+    {
+        factor: 1,
+        hp_step: 0
+    },
+    {
+        factor: 0.5,
+        hp_step: 700
+    },
+    {
+        factor: 0.3,
+        hp_step: 2000
+    }, 
+    {
+        factor: 0.1,
+        hp_step: 5000
+    }
+]
+let monster_hp = hp_curve(monsterTable, capAndFactor)
+writeCSV(monster_hp, ['./ItemSubTable/monster_hp.csv'], csv_options)
 // writeCSV(human_armor, ['./ItemSubTable/human_armor.csv'], csv_options)
 // writeCSV(human_weapon, ['./ItemSubTable/human_weapon.csv'], csv_options)
 // writeCSV(monster_weapon, ['./ItemSubTable/monster_weapon.csv'], csv_options)
