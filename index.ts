@@ -24,17 +24,26 @@ const csv_options = {
     // headers: ['Column 1', 'Column 2', etc...] <-- Won't work with useKeysAsHeaders present!
 };
 
-// import itemTable from './ItemTable_original.json'
+const WRITE_CSV = false;
+import itemTable from './ItemTable_original.json'
 
-// let itemDict: { [reference: string]: Item } = {};
-// (<Item[]>itemTable).forEach((item: Item) => {
-//     itemDict[item.RowName] = item
-// })
-// let reworked_weapons = human_weapons((<Item[]>itemTable), itemDict)
-// writeCSV(reworked_weapons, ['./ItemSubTable/reworked_melee_human_weapon.csv'], csv_options)
+let itemDict: { [reference: string]: Item } = {};
+(<Item[]>itemTable).forEach((item: Item) => {
+    itemDict[item.RowName] = item
+})
 
-// let reworked_bows = human_bow((<Item[]>itemTable), itemDict)
-// writeCSV(reworked_bows, ['./ItemSubTable/reworked_bow_human_weapon.csv'], csv_options)
+let newItemDict = {...itemDict}
+
+let reworked_weapons = human_weapons((<Item[]>itemTable), itemDict)
+WRITE_CSV ? writeCSV(reworked_weapons, ['./ItemSubTable/reworked_melee_human_weapon.csv'], csv_options) : 0;
+
+let reworked_bows = human_bow((<Item[]>itemTable), itemDict)
+WRITE_CSV ? writeCSV(reworked_bows, ['./ItemSubTable/reworked_bow_human_weapon.csv'], csv_options): 0;
+// JSON writting (DataTable)
+[...reworked_weapons, ...reworked_bows].forEach((weapon) => {
+    newItemDict[weapon.RowName] = weapon
+})
+fs.writeFileSync('./newItemTable.json', JSON.stringify(Object.values(newItemDict)))
 
 import monsterTable from './MonsterStatTable_original.json'
 import hp_curve from './src/rework/monster_hp_curve'
@@ -57,10 +66,12 @@ const capAndFactor = [
     }
 ]
 let monster_hp = hp_curve(monsterTable, capAndFactor)
-writeCSV(monster_hp, ['./ItemSubTable/monster_hp.csv'], csv_options)
-// writeCSV(human_armor, ['./ItemSubTable/human_armor.csv'], csv_options)
-// writeCSV(human_weapon, ['./ItemSubTable/human_weapon.csv'], csv_options)
-// writeCSV(monster_weapon, ['./ItemSubTable/monster_weapon.csv'], csv_options)
+WRITE_CSV ? writeCSV(monster_hp, ['./ItemSubTable/monster_hp.csv'], csv_options): 0;
+fs.writeFileSync('./newMonsterTable.json', JSON.stringify(monster_hp))
+
+// WRITE_CSV ? writeCSV(human_armor, ['./ItemSubTable/human_armor.csv'], csv_options): 0;
+// WRITE_CSV ? writeCSV(human_weapon, ['./ItemSubTable/human_weapon.csv'], csv_options): 0;
+// WRITE_CSV ? writeCSV(monster_weapon, ['./ItemSubTable/monster_weapon.csv'], csv_options): 0;
 
 
 
