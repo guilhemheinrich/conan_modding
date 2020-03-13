@@ -8,6 +8,7 @@ import { Item, ItemSelector } from './src/struct/Item'
 import writeCSV from './src/writeCSV'
 import human_weapons from './src/rework/human_weapons'
 import human_bow from './src/rework/human_bowAndAmmunitions'
+import monster_weapons from './src/rework/monster_weapons'
 
 
 
@@ -39,33 +40,27 @@ WRITE_CSV ? writeCSV(reworked_weapons, ['./ItemSubTable/reworked_melee_human_wea
 
 let reworked_bows = human_bow((<Item[]>itemTable), itemDict)
 WRITE_CSV ? writeCSV(reworked_bows, ['./ItemSubTable/reworked_bow_human_weapon.csv'], csv_options): 0;
+
+let reworked_monster_weapons = monster_weapons((<Item[]>itemTable), [
+    {
+        step: 0,
+        factor: 2
+    }, 
+    {
+        step: 50,
+        factor: 1
+    }
+]);
 // JSON writting (DataTable)
-[...reworked_weapons, ...reworked_bows].forEach((weapon) => {
+[...reworked_weapons, ...reworked_bows, ...reworked_monster_weapons].forEach((weapon) => {
     newItemDict[weapon.RowName] = weapon
 })
 fs.writeFileSync('./newItemTable.json', JSON.stringify(Object.values(newItemDict)))
 
 import monsterTable from './MonsterStatTable_original.json'
-import hp_curve from './src/rework/monster_hp_curve'
-const capAndFactor = [
-    {
-        factor: 1,
-        hp_step: 0
-    },
-    {
-        factor: 0.5,
-        hp_step: 700
-    },
-    {
-        factor: 0.3,
-        hp_step: 2000
-    }, 
-    {
-        factor: 0.1,
-        hp_step: 5000
-    }
-]
-let monster_hp = hp_curve(monsterTable, capAndFactor)
+import hp_curve from './src/rework/monster_hp_affine_transformation'
+
+let monster_hp = hp_curve(monsterTable, 400, 4000)
 WRITE_CSV ? writeCSV(monster_hp, ['./ItemSubTable/monster_hp.csv'], csv_options): 0;
 fs.writeFileSync('./newMonsterTable.json', JSON.stringify(monster_hp))
 
